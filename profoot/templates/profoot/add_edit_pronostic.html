@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <div class="card shadow-sm rounded-3">
+                <div class="card-header bg-primary text-white text-center rounded-top-3">
+                    <h3 class="mb-0">{{ page_title }}</h3>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted text-center mb-4">
+                        {% if 'add' in request.resolver_match.url_name %}
+                            Remplissez les détails pour ajouter un nouveau pronostic.
+                        {% else %}
+                            Modifiez les informations de votre pronostic existant.
+                        {% endif %}
+                    </p>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {# Champ pour saisir l'ID Sportmonks pour le pré-remplissage #}
+                        {# Ce n'est plus un champ du formulaire Django, mais un input HTML simple #}
+                        <div class="mb-3">
+                            <label for="api_event_id_input" class="form-label">ID d'événement Sportmonks</label>
+                            <div class="input-group">
+                                <input type="text"
+                                       id="api_event_id_input" {# Nouvelle ID pour le JS #}
+                                       class="form-control"
+                                       placeholder="Ex: 123456 (ID Sportmonks)"
+                                       value="{{ request.GET.api_event_id|default:'' }}"> {# Pré-remplir si déjà dans l'URL #}
+                                <button type="button" class="btn btn-outline-secondary" id="loadApiDataBtn">
+                                    <i class="fas fa-search"></i> Charger les infos
+                                </button>
+                            </div>
+                            <div class="form-text text-muted">
+                                Entrez un ID de match de football de Sportmonks pour pré-remplir les champs.
+                            </div>
+                        </div>
+
+                        {# Le champ 'match' du formulaire Django (ForeignKey vers le modèle Match) #}
+                        {# C'est ici que l'utilisateur sélectionnera (ou verra pré-sélectionné) le match #}
+                        <div class="mb-3">
+                            {{ form.match|as_crispy_field }}
+                            <small class="form-text text-muted">Sélectionnez le match associé à ce pronostic. Les matchs à venir sont listés ici.</small>
+                        </div>
+
+                        {# Afficher les champs du pronostic qui sont pré-remplis en lecture seule #}
+                        {# Ces champs sont sur le modèle Pronostic pour la transition #}
+                        <hr class="my-4">
+                        <h5 class="mb-3 text-primary">Détails du Match (pré-remplis à partir du Match sélectionné)</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.equipe_domicile|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.equipe_exterieur|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.date_match|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.heure_match|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.ligue|as_crispy_field }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.discipline|as_crispy_field }}
+                        </div>
+                        <hr class="my-4">
+
+                        {# Champs spécifiques au pronostic #}
+                        <h5 class="mb-3 text-primary">Votre Prédiction</h5>
+                        <div class="mb-3">
+                            {{ form.type_pari|as_crispy_field }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.prediction_details|as_crispy_field }}
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.prediction_score|as_crispy_field }}
+                            </div>
+                            <div class="col-md-3">
+                                {{ form.cote|as_crispy_field }}
+                            </div>
+                            <div class="col-md-3">
+                                {{ form.mise|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        {# Le champ 'resultat' est toujours là pour la saisie manuelle si besoin, mais souvent mis à jour par la commande #}
+                        <div class="mb-3">
+                            {{ form.resultat|as_crispy_field }}
+                        </div>
+
+                        <hr class="my-4">
+                        <h5 class="mb-3 text-primary">Offre Bookmaker (Optionnel)</h5>
+                        <div class="mb-3">
+                            {{ form.bookmaker_recommande|as_crispy_field }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.lien_pari|as_crispy_field }}
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                {% if 'add' in request.resolver_match.url_name %}
+                                    Ajouter le Pronostic
+                                {% else %}
+                                    Mettre à jour le Pronostic
+                                {% endif %}
+                            </button>
+                            <a href="{% url 'liste_pronostics' %}" class="btn btn-outline-secondary">Annuler</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loadApiDataBtn = document.getElementById('loadApiDataBtn');
+        const apiEventIdInput = document.getElementById('api_event_id_input'); // Nouvelle ID pour l'input
+
+        if (loadApiDataBtn && apiEventIdInput) {
+            loadApiDataBtn.addEventListener('click', function() {
+                const apiEventId = apiEventIdInput.value; // Lire la valeur du nouvel input
+                if (apiEventId) {
+                    // Rediriger avec l'ID pour que la vue puisse pré-remplir le formulaire
+                    window.location.href = `{% url 'add_pronostic' %}?api_event_id=${apiEventId}`;
+                } else {
+                    alert('Veuillez entrer un ID d\'événement Sportmonks.');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,151 @@
+{# profoot/templates/registration/profile.html #}
+{% extends 'base.html' %}
+
+{% block title %}Mon Profil{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-10 col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header text-center bg-dark text-white">
+                    <h3><i class="fas fa-user-circle"></i> Mon Profil</h3>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title text-center mb-4">Informations de l'utilisateur</h4>
+                    <dl class="row">
+                        <dt class="col-sm-4">Nom d'utilisateur :</dt>
+                        <dd class="col-sm-8">{{ user.username }}</dd>
+
+                        <dt class="col-sm-4">Email :</dt>
+                        <dd class="col-sm-8">{% if user.email %}{{ user.email }}{% else %}Non renseigné{% endif %}</dd>
+
+                        <dt class="col-sm-4">Date d'inscription :</dt>
+                        <dd class="col-sm-8">{{ user.date_joined|date:"d M Y H:i" }}</dd>
+
+                        <dt class="col-sm-4">Dernière connexion :</dt>
+                        <dd class="col-sm-8">{% if user.last_login %}{{ user.last_login|date:"d M Y H:i" }}{% else %}Jamais{% endif %}</dd>
+                    </dl>
+                    <div class="text-center mt-4">
+                        <a href="{% url 'password_change' %}" class="btn btn-outline-secondary me-2"><i class="fas fa-key"></i> Changer le mot de passe</a>
+                    </div>
+                </div>
+            </div>
+
+            {# NOUVELLE SECTION : Statistiques de l'utilisateur #}
+            <div class="card mb-4">
+                <div class="card-header text-center bg-primary text-white">
+                    <h3><i class="fas fa-chart-bar"></i> Mes Statistiques</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="p-3 border rounded">
+                                <h5>Total Pronostics</h5>
+                                <p class="h4">{{ total_pronostics }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="p-3 border rounded bg-success text-white">
+                                <h5>Gagnants</h5>
+                                <p class="h4">{{ total_gagnants }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="p-3 border rounded bg-danger text-white">
+                                <h5>Perdants</h5>
+                                <p class="h4">{{ total_perdants }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="p-3 border rounded bg-warning text-dark">
+                                <h5>En Cours</h5>
+                                <p class="h4">{{ total_en_cours }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="p-3 border rounded bg-secondary text-white">
+                                <h5>Annulés</h5>
+                                <p class="h4">{{ total_annules }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="p-3 border rounded">
+                                <h5>Taux de Réussite</h5>
+                                <p class="h4">{{ taux_reussite }}%</p>
+                            </div>
+                        </div>
+                        <div class="col-md-12 col-lg-6 mb-3">
+                            <div class="p-3 border rounded {% if profit_total >= 0 %}bg-success text-white{% else %}bg-danger text-white{% endif %}">
+                                <h5>Profit Total</h5>
+                                <p class="h4">{{ profit_total|floatformat:2 }} €</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {# Fin de la section Statistiques #}
+
+            {# NOUVELLE SECTION : Statistiques de Suivi #}
+            <div class="card mb-4">
+                <div class="card-header text-center bg-dark text-white">
+                    <h3><i class="fas fa-users"></i> Mon Réseau</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-6 mb-3">
+                            <div class="p-3 border rounded">
+                                <h5>Abonnés</h5>
+                                <p class="h4">{{ followers_count }}</p>
+                                {# Idéalement, un lien vers une page listant les abonnés #}
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="p-3 border rounded">
+                                <h5>Abonnements</h5>
+                                <p class="h4">{{ following_count }}</p>
+                                {# Idéalement, un lien vers une page listant les abonnements #}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {# Fin de la section Statistiques de Suivi #}
+
+            {# Section : Pronostics de l'utilisateur #}
+            <div class="card">
+                <div class="card-header text-center bg-info text-white">
+                    <h3><i class="fas fa-chart-line"></i> Mes Pronostics</h3>
+                </div>
+                <div class="card-body">
+                    {% if user_pronostics %}
+                        <div class="list-group">
+                            {% for pronostic in user_pronostics %}
+                                <a href="{% url 'detail_pronostic' pk=pronostic.pk %}" class="list-group-item list-group-item-action flex-column align-items-start mb-2">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1">{{ pronostic.equipe_domicile }} vs {{ pronostic.equipe_exterieur }}</h5>
+                                        <small>{{ pronostic.date_match|date:"d M Y H:i" }}</small>
+                                    </div>
+                                    <p class="mb-1">
+                                        Prédiction: {{ pronostic.prediction_score|default_if_none:"N/A" }} | Cote: {{ pronostic.cote|floatformat:2|default_if_none:"N/A" }} | Mise: {{ pronostic.mise|floatformat:2|default_if_none:"N/A" }} €
+                                    </p>
+                                    <small>Statut:
+                                        <span class="badge {% if pronostic.resultat == 'GAGNANT' %}bg-success{% elif pronostic.resultat == 'PERDANT' %}bg-danger{% elif pronostic.resultat == 'EN_COURS' %}bg-warning text-dark{% elif pronostic.resultat == 'ANNULE' %}bg-secondary{% endif %}">
+                                            {{ pronostic.get_resultat_display }}
+                                        </span>
+                                    </small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center">Vous n'avez pas encore créé de pronostics.</p>
+                        <div class="text-center mt-3">
+                            <a href="{% url 'add_pronostic' %}" class="btn btn-success"><i class="fas fa-plus-circle"></i> Ajouter un premier pronostic</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {# Fin de la section Pronostics #}
+
+        </div>
+    </div>
+{% endblock %}

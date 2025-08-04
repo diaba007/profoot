@@ -1,0 +1,191 @@
+{# profoot/templates/profoot/liste_pronostics.html #}
+
+{% extends 'base.html' %}
+
+{% block title %}Mes Pronostics Sportifs - Accueil{% endblock %} {# MODIFIÉ : Titre généralisé #}
+
+{% block content %}
+
+    <h1 class="my-4 text-center">Mes Derniers Pronostics Sportifs</h1> {# MODIFIÉ : Titre généralisé #}
+
+    {# Formulaire de Recherche, Tri et Filtrage #}
+    <div class="row mb-4 justify-content-center">
+        <div class="col-md-10"> {# Ajusté la taille de colonne pour accueillir le nouveau filtre #}
+            <form method="GET" action="{% url 'liste_pronostics' %}" class="row g-3 align-items-end">
+                <div class="col-md-3"> {# Ajusté la taille de colonne #}
+                    <label for="searchQuery" class="form-label">Rechercher</label>
+                    <input type="text" class="form-control" id="searchQuery" name="q" placeholder="Ex: PSG, Djokovic" value="{{ search_query|default_if_none:'' }}">
+                </div>
+
+                <div class="col-md-2"> {# NOUVEAU : Filtre par Discipline #}
+                    <label for="filterDiscipline" class="form-label">Discipline</label>
+                    <select class="form-select" id="filterDiscipline" name="discipline">
+                        <option value="">Toutes les disciplines</option>
+                        {% for choice_value, choice_label in discipline_choices %}
+                            <option value="{{ choice_value }}" {% if current_discipline == choice_value %}selected{% endif %}>{{ choice_label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                {# NOUVEAU : Filtre par Bookmaker #}
+                <div class="col-md-2">
+                    <label for="filterBookmaker" class="form-label">Bookmaker</label>
+                    <select class="form-select" id="filterBookmaker" name="bookmaker">
+                        <option value="">Tous les bookmakers</option>
+                        {% for bookmaker in bookmakers %} {# 'bookmakers' devra être passé par le contexte de la vue #}
+                            <option value="{{ bookmaker.pk }}" {% if current_bookmaker_id|default:0 == bookmaker.pk %}selected{% endif %}>{{ bookmaker.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2"> {# Ajusté la taille de colonne #}
+                    <label for="sortBy" class="form-label">Trier par date</label>
+                    <select class="form-select" id="sortBy" name="sort">
+                        <option value="-date_match" {% if current_sort == '-date_match' %}selected{% endif %}>Plus récent d'abord</option>
+                        <option value="date_asc" {% if current_sort == 'date_asc' %}selected{% endif %}>Plus ancien d'abord</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3"> {# Ajusté la taille de colonne #}
+                    <label for="filterStatus" class="form-label">Filtrer par statut</label>
+                    <select class="form-select" id="filterStatus" name="status">
+                        <option value="">Tous les statuts</option>
+                        {% for choice_value, choice_label in status_choices %}
+                            <option value="{{ choice_value }}" {% if current_status == choice_value %}selected{% endif %}>{{ choice_label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-auto d-grid"> {# Ajusté la taille de colonne et ajouté d-grid pour le bouton #}
+                    <button type="submit" class="btn btn-primary">Appliquer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if page_obj %}
+        <div class="row">
+        {% for pronostic in page_obj %}
+            <div class="col-12 col-sm-6 col-md-6 mb-4"> {# REMIS À col-md-6 pour 2 colonnes #}
+                <div class="card pronostic-card h-100 text-dark">
+                    <div class="card-body">
+                        <h2 class="card-title">
+                            {% if pronostic.discipline == 'FOOTBALL' %}
+                                <i class="fas fa-futbol"></i>
+                            {% elif pronostic.discipline == 'TENNIS' %}
+                                <i class="fas fa-tennis-ball"></i>
+                            {% elif pronostic.discipline == 'BASKETBALL' %}
+                                <i class="fas fa-basketball-ball"></i>
+                            {% else %}
+                                <i class="fas fa-dice"></i>
+                            {% endif %}
+                            {{ pronostic.equipe_domicile }} vs {{ pronostic.equipe_exterieur }}
+                        </h2>
+                        <h6 class="card-subtitle mb-1 text-muted"> {# RÉDUIT mb-2 à mb-1 #}
+                            <i class="far fa-calendar-alt"></i>
+                            Le {{ pronostic.date_match|date:"d M Y à H:i" }}
+                            {% if pronostic.ligue %}(<i class="fas fa-trophy"></i> {{ pronostic.ligue }}){% endif %}
+                            <span class="badge bg-secondary ms-2">{{ pronostic.get_discipline_display }}</span>
+                        </h6>
+                        <p class="card-text mt-2"><strong><i class="fas fa-lightbulb"></i> Mon analyse et pronostic :</strong></p> {# AJOUTÉ mt-2 #}
+                        <p class="card-text mb-2">{{ pronostic.prediction_details|linebreaksbr|truncatechars:80 }}</p> {# RÉDUIT truncatechars:150 à 80, et mb-4 à mb-2 #}
+
+                        {% if pronostic.prediction_score %}
+                            <p class="card-text mb-1"><strong><i class="fas fa-hashtag"></i> Score prédit :</strong> {{ pronostic.prediction_score }}</p> {# AJOUTÉ mb-1 #}
+                        {% endif %}
+                        {% if pronostic.cote %}
+                            <p class="card-text pronostic-cote mb-1"><strong><i class="fas fa-percentage"></i> Cote :</strong> {{ pronostic.cote|floatformat:2 }}</p> {# AJOUTÉ mb-1 #}
+                        {% endif %}
+
+                        {% if pronostic.bookmaker_recommande %}
+                            <p class="card-text mt-2 mb-1"> {# RÉDUIT mt-3 à mt-2, mb-2 à mb-1 #}
+                                <strong><i class="fas fa-book"></i> Bookmaker Recommandé :</strong>
+                                {% if pronostic.bookmaker_recommande.logo %}
+                                    <img src="{{ pronostic.bookmaker_recommande.logo.url }}" alt="{{ pronostic.bookmaker_recommande.name }} logo" style="height: 20px; vertical-align: middle; margin-left: 5px;">
+                                {% endif %}
+                                <span class="badge bg-info text-dark">{{ pronostic.bookmaker_recommande.name }}</span>
+                            </p>
+                            <a href="{{ pronostic.lien_pari|default:pronostic.bookmaker_recommande.registration_link }}" class="btn btn-success btn-sm mt-1" target="_blank" rel="noopener noreferrer"> {# RÉDUIT mt-2 à mt-1 #}
+                                <i class="fas fa-external-link-alt"></i> Parier ici
+                            </a>
+                        {% elif pronostic.lien_pari %}
+                            <a href="{{ pronostic.lien_pari }}" class="btn btn-success btn-sm mt-1" target="_blank" rel="noopener noreferrer"> {# RÉDUIT mt-2 à mt-1 #}
+                                <i class="fas fa-external-link-alt"></i> Parier ici
+                            </a>
+                        {% endif %}
+
+                        <p class="card-text pronostic-resultat mt-2 {% if pronostic.resultat == 'GAGNANT' %}resultat-gagnant{% elif pronostic.resultat == 'PERDANT' %}resultat-perdant{% elif pronostic.resultat == 'EN_COURS' %}resultat-en-cours{% elif pronostic.resultat == 'ANNULE' %}resultat-annule{% endif %}"> {# AJOUTÉ mt-2 #}
+                            <strong><i class="fas fa-info-circle"></i> Statut :</strong>
+                            {% if pronostic.resultat == 'GAGNANT' %}<i class="fas fa-check-circle"></i> GAGNANT
+                            {% elif pronostic.resultat == 'PERDANT' %}<i class="fas fa-times-circle"></i> PERDANT
+                            {% elif pronostic.resultat == 'EN_COURS' %}<i class="fas fa-clock"></i> À VENIR
+                            {% elif pronostic.resultat == 'ANNULE' %}<i class="fas fa-ban"></i> ANNULE
+                            {% else %}{{ pronostic.get_resultat_display }}{% endif %}
+                            {% if pronostic.resultat != 'EN_COURS' and pronostic.score_final_domicile is not None and pronostic.score_final_exterieur is not None %}
+                                (Score final : {{ pronostic.score_final_domicile }}-{{ pronostic.score_final_exterieur }})
+                            {% endif %}
+                        </p>
+                        <hr class="my-2"> {# RÉDUIT la marge de hr #}
+                        <div class="d-flex justify-content-between align-items-center">
+                             <a href="{% url 'detail_pronostic' pk=pronostic.pk %}" class="btn btn-primary btn-sm">Voir les détails <i class="fas fa-arrow-right ms-1"></i></a>
+                            <small class="text-muted">
+                                Publié par : <a href="{% url 'public_profile' username=pronostic.utilisateur.username %}">
+                                    <strong>{{ pronostic.utilisateur.username }}</strong>
+                                    {% if pronostic.utilisateur.is_staff or pronostic.utilisateur.is_superuser %}
+                                        <i class="fas fa-user-shield admin-icon"></i>
+                                    {% endif %}
+                                </a>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+
+        {# Bloc de navigation de pagination #}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_discipline %}&discipline={{ current_discipline }}{% endif %}{% if current_bookmaker_id %}&bookmaker={{ current_bookmaker_id }}{% endif %}">Précédent</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Précédent</span>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_discipline %}&discipline={{ current_discipline }}{% endif %}{% if current_bookmaker_id %}&bookmaker={{ current_bookmaker_id }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_discipline %}&discipline={{ current_discipline }}{% endif %}{% if current_bookmaker_id %}&bookmaker={{ current_bookmaker_id }}{% endif %}">Suivant</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Suivant</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+
+    {% else %}
+        <div class="alert alert-warning text-center" role="alert">
+            <h4 class="alert-heading">Aucun pronostic trouvé !</h4>
+            <p>Nous n'avons trouvé aucun pronostic correspondant à vos critères de recherche ou de filtre.</p>
+            <hr>
+            <p class="mb-0">Essayez de modifier votre recherche ou de réinitialiser les filtres pour voir tous les pronostics disponibles.</p>
+            <a href="{% url 'liste_pronostics' %}" class="btn btn-info mt-3"><i class="fas fa-undo"></i> Réinitialiser les filtres</a>
+        </div>
+    {% endif %}
+
+{% endblock %}

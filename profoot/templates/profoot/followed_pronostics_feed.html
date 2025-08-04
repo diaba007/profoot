@@ -1,0 +1,89 @@
+{# profoot/templates/profoot/followed_pronostics_feed.html #}
+{% extends 'base.html' %}
+
+{% block title %}Mon Flux d'Abonnements{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1 class="mb-4 text-center">
+            <i class="fas fa-rss"></i> Mon Flux d'Abonnements
+        </h1>
+
+        {% if not user.is_authenticated %}
+            <div class="alert alert-warning text-center" role="alert">
+                Veuillez vous <a href="{% url 'login' %}">connecter</a> pour voir le flux des pronostics des personnes que vous suivez.
+            </div>
+        {% elif not has_followed_users %}
+            <div class="alert alert-info text-center" role="alert">
+                Vous ne suivez encore personne. Visitez les profils d'autres utilisateurs pour commencer à les suivre et voir leurs pronostics ici !
+                <a href="{% url 'liste_pronostics' %}" class="alert-link">Découvrir des pronostics</a>
+            </div>
+        {% elif not page_obj %}
+            <div class="alert alert-info text-center" role="alert">
+                Aucun pronostic disponible de la part des utilisateurs que vous suivez pour le moment.
+            </div>
+        {% else %}
+            <div class="row">
+                <div class="col-md-10 offset-md-1">
+                    {% for pronostic in page_obj %}
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <a href="{% url 'detail_pronostic' pk=pronostic.pk %}">
+                                        {{ pronostic.equipe_domicile }} vs {{ pronostic.equipe_exterieur }}
+                                    </a>
+                                </h5>
+                                <h6 class="card-subtitle mb-2 text-muted">
+                                    Posté par : <a href="{% url 'public_profile' username=pronostic.utilisateur.username %}">{{ pronostic.utilisateur.username }}</a> le {{ pronostic.date_match|date:"d M Y" }} à {{ pronostic.heure_match|default_if_none:"N/A" }}
+                                </h6>
+                                <p class="card-text">
+                                    <strong>Ligue :</strong> {{ pronostic.ligue|default_if_none:"Non spécifiée" }}<br>
+                                    <strong>Prédiction :</strong> {{ pronostic.prediction_score|default_if_none:"N/A" }}<br>
+                                    <strong>Cote :</strong> {{ pronostic.cote|floatformat:2|default_if_none:"N/A" }} |
+                                    <strong>Mise :</strong> {{ pronostic.mise|floatformat:2|default_if_none:"N/A" }} €
+                                </p>
+                                <p class="card-text">
+                                    <strong>Analyse :</strong> {{ pronostic.prediction_details|truncatechars:150 }}
+                                </p>
+                                <p class="card-text">
+                                    <small class="text-muted">Statut :
+                                        <span class="badge {% if pronostic.resultat == 'GAGNANT' %}bg-success{% elif pronostic.resultat == 'PERDANT' %}bg-danger{% elif pronostic.resultat == 'EN_COURS' %}bg-warning text-dark{% elif pronostic.resultat == 'ANNULE' %}bg-secondary{% endif %}">
+                                            {{ pronostic.get_resultat_display }}
+                                        </span>
+                                    </small>
+                                </p>
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                    {# Pagination #}
+                    {% if page_obj.has_other_pages %}
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a></li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Précédent</span></li>
+                                {% endif %}
+
+                                {% for i in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == i %}
+                                        <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                                    {% else %}
+                                        <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a></li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Suivant</span></li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

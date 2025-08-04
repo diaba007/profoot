@@ -1,0 +1,32 @@
+{# profoot/templates/profoot/confirm_delete_pronostic.html #}
+{% extends 'base.html' %}
+
+{% block title %}Confirmer la Suppression{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white text-center">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Confirmer la Suppression</h3>
+                </div>
+                <div class="card-body">
+                    <p class="lead text-center">Êtes-vous sûr de vouloir supprimer le pronostic suivant ?</p>
+                    <div class="alert alert-warning text-center" role="alert">
+                        <strong>Match :</strong> {{ pronostic.equipe_domicile }} vs {{ pronostic.equipe_exterieur }}<br>
+                        <strong>Date :</strong> {{ pronostic.date_match|date:"d M Y à H:i" }}<br>
+                        <strong>Ligue :</strong> {{ pronostic.ligue|default_if_none:"Non spécifiée" }}
+                    </div>
+
+                    <p class="text-center">Cette action est **irréversible**.</p>
+
+                    <form method="post" class="text-center mt-4">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger me-2"><i class="fas fa-trash-alt"></i> Oui, supprimer</button>
+                        <a href="{% url 'detail_pronostic' pk=pronostic.pk %}" class="btn btn-secondary"><i class="fas fa-times-circle"></i> Annuler</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{# profoot/templates/registration/login.html #}
+{% extends 'base.html' %}
+{% load crispy_forms_tags %} {# Pour le style des formulaires plus tard, pré-chargé #}
+
+{% block title %}Connexion{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6 col-lg-4">
+            <div class="card">
+                <div class="card-header text-center bg-dark text-white">
+                    <h3><i class="fas fa-sign-in-alt"></i> Connexion</h3>
+                </div>
+                <div class="card-body">
+                    {% if form.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            Votre nom d'utilisateur et/ou votre mot de passe sont incorrects. Veuillez réessayer.
+                        </div>
+                    {% endif %}
+
+                    {% if next %}
+                        {% if user.is_authenticated %}
+                            <div class="alert alert-warning" role="alert">
+                                Vous n'avez pas l'autorisation d'accéder à cette page. Veuillez vous connecter avec un compte qui a les permissions nécessaires.
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info" role="alert">
+                                Veuillez vous connecter pour voir cette page.
+                            </div>
+                        {% endif %}
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %} {# Très important pour la sécurité #}
+                        {{ form|crispy }} {# Affiche le formulaire avec le style Crispy Forms #}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary mt-3">Se connecter</button>
+                        </div>
+                        <p class="text-center mt-3">
+                            <a href="{% url 'password_reset' %}">Mot de passe oublié ?</a>
+                        </p>
+                        <input type="hidden" name="next" value="{{ next }}">
+                    </form>
+                </div>
+            </div>
+            <p class="text-center mt-3">
+                Vous n'avez pas de compte ? <a href="{% url 'register' %}">Créez-en un ici</a>.
+            </p>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,147 @@
+{# profoot/templates/base.html #}
+{% load static %}
+
+<!DOCTYPE html>
+{# Condition pour appliquer la classe 'dark-theme' ou 'light-theme' #}
+{# Utilisez 'request.user' pour accéder aux propriétés de l'utilisateur #}
+<html lang="fr" class="{% if request.user.is_authenticated and request.user.profile.theme_preference == 'dark' %}dark-theme{% else %}light-theme{% endif %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ProFoot Pronos{% endblock %}</title>
+
+        {# Liens Google Fonts pour Playfair Display #}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    {# Assurez-vous que l'intégrité et crossorigin sont corrects pour Font Awesome si vous les avez modifiés #}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{% static 'profoot/style.css' %}">
+    {% block extra_head %}
+    {% endblock %}
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'liste_pronostics' %}">ProFoot Pronos</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.view_name == 'liste_pronostics' %}active{% endif %}" aria-current="page" href="{% url 'liste_pronostics' %}">Accueil</a>
+                    </li>
+                    {% if request.user.is_authenticated %} {# Utilisez 'request.user' #}
+                        {# SYNTAXE CORRIGÉE ICI (UTILISATION DU FILTRE 'perms') #}
+                        {% if 'profoot.add_pronostic' in perms %}
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.view_name == 'add_pronostic' %}active{% endif %}" href="{% url 'add_pronostic' %}"><i class="fas fa-plus-circle"></i> Ajouter Pronostic</a>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.view_name == 'followed_pronostics_feed' %}active{% endif %}" href="{% url 'followed_pronostics_feed' %}"><i class="fas fa-stream"></i> Mon Flux</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.view_name == 'notification_list' %}active{% endif %}" href="{% url 'notification_list' %}">
+                                <i class="fas fa-bell"></i> Notifications
+                                {# Utilise la variable 'unread_notifications_count' qui doit être passée par le contexte de la vue #}
+                                {% if unread_notifications_count is not None and unread_notifications_count > 0 %}
+                                    <span class="badge bg-danger rounded-pill">{{ unread_notifications_count }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin:index' %}">Administration</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'promo_codes' %}">
+                            <i class="fas fa-bullhorn me-1"></i> Offres Promo
+                        </a>
+                    </li>
+                </ul>
+
+                {# Liens d'authentification et bouton de thème à droite #}
+                <ul class="navbar-nav ms-auto">
+                    {# Bouton de bascule de thème #}
+                    {% if request.user.is_authenticated %}
+                        {# Vérifiez si le profil existe avant d'essayer d'accéder à request.user.profile #}
+                        {% if request.user.profile %}
+                            <li class="nav-item me-2"> {# Ajout de marge à droite #}
+                                <a class="nav-link btn btn-outline-light" href="{% url 'toggle_theme' %}" title="Changer de thème">
+                                    {% if request.user.profile.theme_preference == 'dark' %}
+                                        <i class="fas fa-sun"></i> Clair
+                                    {% else %}
+                                        <i class="fas fa-moon"></i> Sombre
+                                    {% endif %}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if request.user.is_authenticated %}
+                        <li class="nav-item">
+                            <span class="nav-link text-white">Bienvenue, {{ request.user.username }}!</span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.view_name == 'profile' %}active{% endif %}" href="{% url 'profile' %}"><i class="fas fa-user-circle"></i> Mon Profil</a>
+                        </li>
+                        <li class="nav-item">
+                            <form action="{% url 'logout' %}" method="post" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-link nav-link text-danger" style="padding-top: 8px; padding-bottom: 8px;">
+                                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                                </button>
+                            </form>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}"><i class="fas fa-sign-in-alt"></i> Connexion</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'register' %}"><i class="fas fa-user-plus"></i> Inscription</a>
+                        </li>
+                    {% endif %}
+                </ul>
+
+                {# Formulaire de recherche dans la navbar #}
+                <form class="d-flex ms-3" method="GET" action="{% url 'liste_pronostics' %}"> {# Ajout de marge à gauche #}
+                    <input class="form-control me-2" type="search" placeholder="Rechercher un match..." aria-label="Search" name="q" value="{{ search_query|default_if_none:'' }}">
+                    <button class="btn btn-outline-success" type="submit"><i class="fas fa-search"></i></button>
+                </form>
+
+            </div>
+        </div>
+    </nav>
+
+    {# Affichage des messages flash #}
+    <div class="container mt-3">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    {% block extra_js %}
+    {% endblock %}
+
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <div class="container">
+            <p>&copy; {% now "Y" %} ProFoot Pronos. Tous droits réservés.</p>
+            <p>Créé avec Django et Bootstrap.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,172 @@
+{# profoot/templates/profoot/detail_pronostic.html #}
+{% extends 'base.html' %}
+
+{% block title %}Pronostic {{ pronostic.get_discipline_display }} : {{ pronostic.equipe_domicile }} vs {{ pronostic.equipe_exterieur }}{% endblock %}
+
+{% block content %}
+
+    <div class="card pronostic-detail-card">
+        <div class="card-body">
+            <h2 class="card-title">
+                {# Affichage de l'icône en fonction de la discipline #}
+                {% if pronostic.discipline == 'FOOTBALL' %}
+                    <i class="fas fa-futbol"></i>
+                {% elif pronostic.discipline == 'TENNIS' %}
+                    <i class="fas fa-tennis-ball"></i>
+                {% elif pronostic.discipline == 'BASKETBALL' %}
+                    <i class="fas fa-basketball-ball"></i>
+                {% else %}
+                    <i class="fas fa-dice"></i> {# Icône générique #}
+                {% endif %}
+                {{ pronostic.equipe_domicile }} vs {{ pronostic.equipe_exterieur }}
+            </h2>
+            <h6 class="card-subtitle mb-2 text-muted">
+                <i class="far fa-calendar-alt"></i>
+                Le {{ pronostic.date_match|date:"d M Y à H:i" }}
+                {% if pronostic.ligue %}(<i class="fas fa-trophy"></i> {{ pronostic.ligue }}){% endif %}
+                <span class="badge bg-secondary ms-2">{{ pronostic.get_discipline_display }}</span>
+            </h6>
+
+            <p class="card-text mb-2">
+                <strong><i class="fas fa-tags"></i> Type de pari :</strong>
+                <span class="badge bg-dark">{{ pronostic.get_type_pari_display }}</span>
+            </p>
+
+            <hr>
+            <p class="card-text"><strong><i class="fas fa-lightbulb"></i> Analyse détaillée :</strong></p>
+            <p class="card-text lead">{{ pronostic.prediction_details|linebreaksbr }}</p>
+
+            {% if pronostic.prediction_score %}
+                <p class="card-text"><strong><i class="fas fa-hashtag"></i> Score prédit :</strong> {{ pronostic.prediction_score }}</p>
+            {% endif %}
+            {% if pronostic.cote %}
+                <p class="card-text"><strong><i class="fas fa-percentage"></i> Cote :</strong> <span class="badge bg-primary">{{ pronostic.cote|floatformat:2 }}</span></p>
+            {% endif %}
+            {% if pronostic.mise %}
+                <p class="card-text"><strong><i class="fas fa-coins"></i> Mise :</strong> <span class="badge bg-info text-dark">{{ pronostic.mise|floatformat:2 }} €</span></p>
+            {% endif %}
+
+            {# NOUVEAU : Affichage du bookmaker et du bouton "Parier" #}
+            {% if pronostic.bookmaker_recommande %}
+                <p class="card-text mt-3 mb-2">
+                    <strong><i class="fas fa-book"></i> Bookmaker Recommandé :</strong>
+                    {% if pronostic.bookmaker_recommande.logo %}
+                        <img src="{{ pronostic.bookmaker_recommande.logo.url }}" alt="{{ pronostic.bookmaker_recommande.name }} logo" style="height: 25px; vertical-align: middle; margin-left: 5px;">
+                    {% endif %}
+                    <span class="badge bg-info text-dark">{{ pronostic.bookmaker_recommande.name }}</span>
+                </p>
+            {% endif %}
+
+            {% if pronostic.lien_pari %}
+                <a href="{{ pronostic.lien_pari }}" class="btn btn-success mt-3" target="_blank" rel="noopener noreferrer">
+                    <i class="fas fa-external-link-alt"></i> Parier sur {{ pronostic.bookmaker_recommande.name|default:"ce bookmaker" }}
+                </a>
+            {% elif pronostic.bookmaker_recommande and pronostic.bookmaker_recommande.registration_link %}
+                {# Si pas de lien de pari spécifique, mais un bookmaker est recommandé, proposer le lien d'inscription du bookmaker #}
+                <a href="{{ pronostic.bookmaker_recommande.registration_link }}" class="btn btn-outline-success mt-3" target="_blank" rel="noopener noreferrer">
+                    <i class="fas fa-external-link-alt"></i> S'inscrire sur {{ pronostic.bookmaker_recommande.name }}
+                </a>
+            {% endif %}
+
+            <p class="card-text mt-3"> {# Ajout de mt-3 pour espacer du bouton de pari #}
+                <strong><i class="fas fa-info-circle"></i> Statut actuel :</strong>
+                <span class="badge {% if pronostic.resultat == 'GAGNANT' %}bg-success{% elif pronostic.resultat == 'PERDANT' %}bg-danger{% elif pronostic.resultat == 'EN_COURS' %}bg-warning text-dark{% elif pronostic.resultat == 'ANNULE' %}bg-secondary{% endif %}">
+                    {% if pronostic.resultat == 'GAGNANT' %}<i class="fas fa-check-circle"></i>
+                    {% elif pronostic.resultat == 'PERDANT' %}<i class="fas fa-times-circle"></i>
+                    {% elif pronostic.resultat == 'EN_COURS' %}<i class="fas fa-clock"></i>
+                    {% elif pronostic.resultat == 'ANNULE' %}<i class="fas fa-ban"></i>
+                    {% endif %}
+                    {{ pronostic.get_resultat_display }}
+                </span>
+            </p>
+            {% if pronostic.resultat != 'EN_COURS' and pronostic.score_final_domicile is not None and pronostic.score_final_exterieur is not None %}
+                <p class="card-text"><strong><i class="fas fa-calculator"></i> Score final :</strong> <span class="badge bg-info text-dark">{{ pronostic.score_final_domicile }}-{{ pronostic.score_final_exterieur }}</span></p>
+            {% endif %}
+            {% if pronostic.utilisateur %}
+                <p class="card-text text-muted text-end">
+                    <small>
+                        Créé par :
+                        <a href="{% url 'public_profile' username=pronostic.utilisateur.username %}"
+                           class="{% if pronostic.utilisateur.is_staff or pronostic.utilisateur.is_superuser %}admin-username{% endif %}">
+                            <strong>{{ pronostic.utilisateur.username }}</strong>
+                            {% if pronostic.utilisateur.is_staff or pronostic.utilisateur.is_superuser %}
+                                <i class="fas fa-user-shield admin-icon"></i>
+                            {% endif %}
+                        </a>
+                    </small>
+                </p>
+            {% endif %}
+            <p class="card-text text-muted text-end"><small>Créé le : {{ pronostic.date_creation|date:"d M Y H:i" }}</small></p>
+
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <a href="{% url 'liste_pronostics' %}" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Retour à la liste</a>
+
+                {# MODIFICATIONS ICI : Ajout des conditions de permission #}
+                {% if request.user.is_authenticated and pronostic.utilisateur == request.user %}
+                    <div class="btn-group">
+                        {# CORRIGÉ : Utilisation de la syntaxe 'in perms' #}
+                        {% if 'profoot.change_pronostic' in perms %}
+                            <a href="{% url 'edit_pronostic' pk=pronostic.pk %}" class="btn btn-warning"><i class="fas fa-edit"></i> Modifier</a>
+                        {% endif %}
+                        {# CORRIGÉ : Utilisation de la syntaxe 'in perms' #}
+                        {% if 'profoot.delete_pronostic' in perms %}
+                            <a href="{% url 'delete_pronostic' pk=pronostic.pk %}" class="btn btn-danger ms-2"><i class="fas fa-trash-alt"></i> Supprimer</a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-5">
+
+    {# SECTION DES COMMENTAIRES #}
+    <div class="comments-section">
+        <h3 class="mb-4">Commentaires ({{ comments|length }})</h3>
+
+        {% if user.is_authenticated %}
+            <div class="card mb-4">
+                <div class="card-header">Ajouter un commentaire</div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ comment_form.as_p }}
+                        <button type="submit" class="btn btn-success mt-2"><i class="fas fa-comment-dots"></i> Poster le commentaire</button>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                Vous devez être connecté pour laisser un commentaire. <a href="{% url 'login' %}?next={{ request.path }}">Connectez-vous ici</a>.
+            </div>
+        {% endif %}
+
+        {# Liste des commentaires existants #}
+        {% if comments %}
+            <div class="list-group">
+                {% for comment in comments %}
+                    <div class="list-group-item list-group-item-action flex-column align-items-start mb-3
+                                {% if comment.author.is_staff or comment.author.is_superuser %}admin-comment{% endif %}">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">
+                                <i class="fas fa-user-circle"></i>
+                                <a href="{% url 'public_profile' username=comment.author.username %}"
+                                   class="{% if comment.author.is_staff or comment.author.is_superuser %}admin-username{% endif %}">
+                                    {{ comment.author.username }}
+                                    {% if comment.author.is_staff or comment.author.is_superuser %}
+                                        <i class="fas fa-user-shield admin-icon"></i>
+                                    {% endif %}
+                                </a>
+                            </h5>
+                            <small class="text-muted"><i class="far fa-clock"></i> {{ comment.created_at|date:"d M Y à H:i" }}</small>
+                        </div>
+                        <p class="mb-1">{{ comment.content|linebreaksbr }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Aucun commentaire pour l'instant. Soyez le premier à commenter !</p>
+        {% endif %}
+    </div>
+
+{% endblock %}

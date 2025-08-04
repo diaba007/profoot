@@ -1,0 +1,523 @@
+/* profoot/static/profoot/style.css */
+
+/* --- Définition des variables de thème --- */
+:root { /* Thème Clair (par défaut) */
+    --primary-bg-color: #F0F4F8; /* Fond principal : Gris très clair/Bleuté */
+    --secondary-bg-color: #FFFFFF; /* Fond des cartes/éléments secondaires : Blanc */
+    --text-color: #2C3E50; /* Texte principal : Bleu-gris très foncé */
+    --muted-text-color: #7F8C8D; /* Texte muet : Gris moyen */
+    --border-color: #DCE1E6; /* Bordures : Gris très clair */
+    --link-color: #2ECC71; /* Liens/Accents : Vert Émeraude vif */
+    --link-hover-color: #27AE60; /* Liens au survol : Vert plus foncé */
+    --navbar-bg: #2C3E50; /* Navbar : Bleu-gris foncé */
+    --navbar-text: #ECF0F1; /* Texte Navbar : Blanc-cassé */
+
+    /* Couleurs des résultats */
+    --resultat-gagnant: #28a745; /* Vert (inchangé, s'accorde bien) */
+    --resultat-perdant: #dc3545; /* Rouge (inchangé) */
+    --resultat-en-cours: #ffc107; /* Jaune/Orange (inchangé) */
+    --resultat-annule: #6c757d; /* Gris (inchangé) */
+
+    /* Variable pour le survol de la carte */
+    --card-hover-bg-color: #F5F7F9; /* Gris très léger pour le thème clair */
+
+    /* Variables de couleur pour les styles admin */
+    --admin-text-color: #0056b3;
+    --admin-icon-color: #007bff;
+    --admin-border-color: #007bff;
+    --admin-comment-bg-color: #e6f2ff;
+}
+
+html.dark-theme { /* Thème Sombre */
+    --primary-bg-color: #212B3B; /* Fond principal : Bleu-gris très foncé */
+    --secondary-bg-color: #2C3E50; /* Fond des cartes/éléments secondaires : Bleu-gris foncé */
+    --text-color: #ECF0F1; /* Texte principal : Blanc-cassé */
+    --muted-text-color: #BDC3C7; /* Texte muet : Gris clair */
+    --border-color: #34495E; /* Bordures : Bleu-gris foncé */
+    --link-color: #2ECC71; /* Liens/Accents : Vert Émeraude vif */
+    --link-hover-color: #27AE60; /* Liens au survol : Vert plus foncé */
+    --navbar-bg: #1A232F; /* Navbar : Bleu-gris encore plus foncé */
+    --navbar-text: #BDC3C7; /* Texte Navbar : Gris clair */
+
+    /* Couleurs des résultats (légèrement ajustées pour le thème sombre) */
+    --resultat-gagnant: #20c997; /* Vert-bleu */
+    --resultat-perdant: #fd7e14; /* Orange-rouge */
+    --resultat-en-cours: #ffc107; /* Jaune/Orange */
+    --resultat-annule: #adb5bd; /* Gris clair */
+
+    /* Variable pour le survol de la carte */
+    --card-hover-bg-color: #3B424D; /* Gris-bleu plus foncé pour le thème sombre */
+
+    /* Variables de couleur pour les styles admin */
+    --admin-text-color: #87CEEB;
+    --admin-icon-color: #ADD8E6;
+    --admin-border-color: #ADD8E6;
+    --admin-comment-bg-color: #3b424d;
+}
+
+/* --- DÉFINITION DES POLICES DE CARACTÈRES --- */
+body {
+    font-family: 'Roboto', sans-serif; /* Police principale pour tout le texte, sauf les titres */
+    background-color: var(--primary-bg-color);
+    color: var(--text-color);
+}
+
+/* Appliquer Playfair Display aux titres (h1, h2, h3, etc.) et à la marque de la navbar */
+h1, h2, h3, h4, h5, h6, .navbar-brand, .card-header h3 {
+    font-family: 'Playfair Display', serif; /* Applique Playfair Display aux titres et marque */
+    font-weight: 700; /* Généralement un bon poids pour les titres avec Playfair Display */
+    color: var(--text-color); /* Assure que les titres héritent la couleur du thème */
+}
+/* --- FIN DES DÉFINITIONS DE POLICE --- */
+
+
+/* Appliquer les variables CSS aux éléments */
+body {
+    background-color: var(--primary-bg-color);
+    color: var(--text-color);
+}
+
+/* Ajustement pour le conteneur principal si vous l'utilisez pour tout le contenu */
+.container {
+    color: var(--text-color); /* S'assure que le texte dans le container prend la bonne couleur */
+}
+
+/* Votre ancien style de navbar, maintenant géré par les variables */
+.navbar {
+    margin-bottom: 20px;
+    background-color: var(--navbar-bg) !important; /* Utiliser !important pour écraser Bootstrap si nécessaire */
+}
+.navbar .nav-link, .navbar .navbar-brand, .navbar .nav-item span {
+    color: var(--navbar-text) !important;
+}
+
+/* --- Effets de survol / animations subtiles --- */
+
+/* 1. Liens de navigation dans la Navbar */
+.navbar .nav-link {
+    transition: color 0.3s ease, transform 0.2s ease; /* Transition douce pour la couleur et le mouvement */
+}
+
+.navbar .nav-link:hover {
+    color: var(--link-hover-color) !important; /* Utilise la couleur de survol des liens */
+    transform: translateY(-2px); /* Léger soulèvement au survol */
+}
+
+/* 2. Icônes interactives */
+.fas, .far { /* Ciblage général des icônes Font Awesome */
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+/* Effet sur les icônes à l'intérieur des liens */
+a .fas, a .far {
+    /* Hérite la transition du parent, mais on peut ajouter un effet spécifique */
+}
+
+a .fas:hover, a .far:hover {
+    color: var(--link-hover-color); /* Rend l'icône plus vive au survol */
+    transform: scale(1.1); /* Agrandit légèrement l'icône */
+}
+
+/* Pour les icônes de bascule de thème */
+.nav-link.btn-outline-light .fas {
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.nav-link.btn-outline-light:hover .fas {
+    transform: rotate(360deg); /* Rotation complète au survol */
+    color: var(--link-hover-color);
+}
+
+
+/* --- Styles spécifiques aux badges/tags --- */
+
+/* Amélioration du style général du .badge */
+.badge {
+    display: inline-flex; /* Assure que le contenu est bien centré */
+    align-items: center;
+    justify-content: center;
+    padding: 0.45em 0.8em; /* Légèrement plus de padding pour un look plus doux */
+    border-radius: 50rem; /* Rend les bords très arrondis pour un look "pilule" */
+    font-size: 0.75em; /* Taille de police légèrement plus petite pour les tags */
+    font-weight: 700; /* Plus de gras pour la lisibilité */
+    text-transform: uppercase; /* Met le texte en majuscules pour un look de tag */
+    letter-spacing: 0.05em; /* Léger espacement entre les lettres */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Légère ombre pour les faire ressortir */
+    transition: all 0.2s ease-in-out; /* Transition douce pour tous les changements */
+    white-space: nowrap; /* Empêche le texte de se casser sur plusieurs lignes */
+}
+
+.badge:hover {
+    transform: translateY(-2px); /* Soulèvement plus prononcé au survol */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Ombre plus prononcée */
+    opacity: 0.9; /* Légère opacité pour l'effet de survol */
+}
+
+/* Couleurs par défaut pour les badges Bootstrap si vous les utilisez (ex: .badge-primary, .badge-secondary) */
+.badge-primary {
+    background-color: var(--link-color); /* Utilise votre vert accentué */
+    color: var(--navbar-text);
+}
+.badge-secondary {
+    background-color: var(--muted-text-color);
+    color: var(--secondary-bg-color);
+}
+html.dark-theme .badge-secondary {
+    background-color: var(--border-color);
+    color: var(--text-color);
+}
+/* Ajoutez d'autres classes de badges Bootstrap si vous les utilisez (info, warning, danger, success) */
+.badge-success {
+    background-color: var(--resultat-gagnant);
+    color: var(--navbar-text);
+}
+.badge-danger {
+    background-color: var(--resultat-perdant);
+    color: var(--navbar-text);
+}
+.badge-warning {
+    background-color: var(--resultat-en-cours);
+    color: var(--text-color); /* Texte sombre sur le jaune/orange */
+}
+.badge-info {
+    background-color: var(--admin-icon-color); /* Ou une autre couleur d'info */
+    color: var(--navbar-text);
+}
+
+/* Classes spécifiques pour les types de badges si vous voulez des couleurs dédiées */
+.badge-discipline {
+    background-color: var(--link-color); /* Vert accentué pour les disciplines */
+    color: var(--navbar-text); /* Texte clair */
+    border: 1px solid var(--link-hover-color);
+}
+
+/* Exemple pour un badge de type de pari */
+.badge-type-pari {
+    background-color: var(--text-color); /* Utilise la couleur du texte principal pour un look neutre */
+    color: var(--secondary-bg-color); /* Texte clair sur le fond sombre */
+    border: 1px solid var(--muted-text-color);
+}
+html.dark-theme .badge-type-pari {
+    background-color: var(--muted-text-color);
+    color: var(--primary-bg-color);
+}
+
+/* Si vous avez des badges pour les statuts de pronostic (en plus des couleurs de texte) */
+.badge-statut-gagnant {
+    background-color: var(--resultat-gagnant);
+    color: var(--navbar-text);
+}
+.badge-statut-perdant {
+    background-color: var(--resultat-perdant);
+    color: var(--navbar-text);
+}
+.badge-statut-en-cours {
+    background-color: var(--resultat-en-cours);
+    color: var(--text-color);
+}
+.badge-statut-annule {
+    background-color: var(--resultat-annule);
+    color: var(--navbar-text);
+}
+/* --- Fin des styles spécifiques aux badges/tags --- */
+
+
+/* 4. Boutons (peaufiner les animations existantes) */
+.btn-success, .btn-secondary, .btn-info, .btn-danger {
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Ombre par défaut pour les boutons */
+}
+
+.btn-success:hover, .btn-secondary:hover, .btn-info:hover, .btn-danger:hover {
+    transform: translateY(-2px); /* Un soulèvement légèrement plus prononcé pour les boutons */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Ombre plus prononcée au survol */
+}
+
+.btn-success:active, .btn-secondary:active, .btn-info:active, .btn-danger:active {
+    transform: translateY(0); /* Retour à la position normale au clic */
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1); /* Ombre réduite au clic */
+}
+/* --- Fin des effets de survol / animations subtiles --- */
+
+
+/* Cartes (div.card) et pronostic-card */
+.card {
+    background-color: var(--secondary-bg-color);
+    border-color: var(--border-color);
+    color: var(--text-color); /* Assure la couleur du texte à l'intérieur de la carte */
+    border-radius: 15px; /* Assurez-vous que cela est appliqué */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Assurez-vous que cela est appliqué */
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; /* Transition pour le thème */
+}
+
+/* Style spécifique pour la carte de pronostic clickable */
+.pronostic-card {
+    color: var(--text-color); /* Assure que la couleur du texte à l'intérieur de la carte reste celle du thème */
+}
+
+.pronostic-card:hover {
+    transform: translateY(-3px); /* Effet au survol */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    background-color: var(--card-hover-bg-color); /* Utilise la variable définie plus haut */
+    border-color: var(--link-color); /* Bordure colorée au survol */
+}
+
+.card-header {
+    background-color: var(--secondary-bg-color); /* Garder le même fond que la carte */
+    border-bottom-color: var(--border-color);
+    color: var(--text-color); /* Assure la couleur du texte de l'en-tête */
+}
+
+/* Vos styles existants pour pronostic-card, pronostic-detail-card, etc. */
+.pronostic-card h2, .pronostic-detail-card h2 {
+    color: var(--text-color);
+}
+.pronostic-card h6, .pronostic-detail-card h6 {
+    color: var(--muted-text-color);
+}
+.pronostic-card p, .pronostic-detail-card p {
+    color: var(--text-color);
+}
+
+/* Styles spécifiques pour les labels et les icônes dans les cartes */
+.pronostic-card strong {
+    color: var(--text-color); /* Garde le gras avec la couleur du texte principal */
+}
+
+/* --- CIBLAGE PRÉCIS POUR "MON ANALYSE", "COTE", "STATUT" ET LEURS ICÔNES --- */
+
+/* Style général pour les icônes dans les paragraphes de la carte */
+.pronostic-card p .fas,
+.pronostic-card p .far {
+    color: var(--link-color); /* Rend les icônes des détails plus visibles */
+    margin-right: 8px; /* Espace entre icône et texte */
+}
+
+/* Style pour le texte "Mon analyse et pronostic" */
+.pronostic-card p strong .fas.fa-lightbulb {
+    color: var(--link-color); /* Mettre l'ampoule en couleur d'accentuation */
+}
+/* La partie texte "Mon analyse et pronostic :" doit rester en gras mais peut être de la couleur principale */
+.pronostic-card p strong {
+    color: var(--text-color);
+}
+
+/* Style pour la Cote */
+.pronostic-card .pronostic-cote {
+    font-weight: bold;
+    color: var(--text-color); /* Couleur du texte principal pour la ligne */
+}
+.pronostic-card .pronostic-cote .fas.fa-percentage {
+    color: var(--link-color); /* Mettre l'icône pourcentage en couleur d'accentuation */
+}
+
+/* Style pour le Statut */
+.pronostic-card .pronostic-resultat {
+    font-weight: bold;
+}
+.pronostic-card .pronostic-resultat .fas {
+    margin-right: 5px;
+}
+.pronostic-card .pronostic-resultat strong .fas.fa-info-circle {
+    color: var(--link-color); /* Icône info-circle pour "Statut" */
+}
+
+
+/* Styles pour les résultats, utilisant les variables de thème */
+.resultat-gagnant { color: var(--resultat-gagnant); }
+.resultat-perdant { color: var(--resultat-perdant); }
+.resultat-en-cours { color: var(--resultat-en-cours); }
+.resultat-annule { color: var(--resultat-annule); }
+
+/* Texte muet */
+.text-muted {
+    color: var(--muted-text-color) !important;
+}
+
+/* Liens */
+a {
+    color: var(--link-color);
+}
+
+a:hover {
+    color: var(--link-hover-color);
+}
+
+/* Formulaires */
+.form-control {
+    background-color: var(--secondary-bg-color);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+.form-control:focus {
+    background-color: var(--secondary-bg-color);
+    color: var(--text-color);
+    border-color: var(--link-color); /* Ou une autre couleur de focus */
+}
+
+/* Pagination Links */
+.pagination .page-link {
+    background-color: var(--secondary-bg-color);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--link-color);
+    border-color: var(--link-color);
+    color: var(--navbar-text); /* blanc */
+}
+
+.pagination .page-link:hover {
+    background-color: var(--link-hover-color);
+    border-color: var(--link-hover-color);
+    color: var(--navbar-text);
+}
+
+.comments-section .list-group-item {
+    background-color: var(--secondary-bg-color);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+/* Pour les messages Django */
+.messages {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+.messages li {
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+/* Couleurs des alertes Bootstrap pour le thème clair */
+.messages .alert-success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+.messages .alert-info { background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
+.messages .alert-warning { background-color: #fff3cd; color: #856404; border-color: #ffeeba; }
+.messages .alert-danger { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+
+/* Styles pour le thème sombre (spécifique aux messages) */
+html.dark-theme .messages .alert-success { background-color: #28a745; color: #fff; border-color: #28a745; }
+html.dark-theme .messages .alert-info { background-color: #17a2b8; color: #fff; border-color: #17a2b8; }
+html.dark-theme .messages .alert-warning { background-color: #ffc107; color: #343a40; border-color: #ffc107; }
+html.dark-theme .messages .alert-danger { background-color: #dc3545; color: #fff; border-color: #dc3545; }
+
+/* Ajustement pour les boutons Bootstrap si nécessaire dans le thème sombre */
+/* NOTE: Ces règles sont partiellement redondantes avec les styles de boutons personnalisés plus haut. */
+/* Les règles plus spécifiques pour .btn-success, .btn-secondary, .btn-info, .btn-danger prendront le dessus. */
+/* Je les laisse ici au cas où vous auriez d'autres boutons Bootstrap par défaut sans classes spécifiques */
+html.dark-theme .btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: #fff;
+}
+html.dark-theme .btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+/* Ces règles pour btn-secondary et btn-info seront écrasées par vos règles personnalisées si elles sont plus spécifiques */
+html.dark-theme .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: #fff;
+}
+html.dark-theme .btn-secondary:hover {
+    background-color: #5c636a;
+    border-color: #565e64;
+}
+html.dark-theme .btn-info {
+    background-color: #0dcaf0;
+    border-color: #0dcaf0;
+    color: #000;
+}
+html.dark-theme .btn-info:hover {
+    background-color: #31d2f2;
+    border-color: #25cff2;
+}
+
+/* --- AJOUTS POUR LA PAGE D'ACCUEIL ET CONTENEURS GÉNÉRIQUES --- */
+
+/* Pour le conteneur principal qui encapsule le contenu (souvent .container de Bootstrap) */
+/* S'assurer que le texte dans le container prend la couleur du thème */
+/* .container { color: var(--text-color); } - Déjà défini plus haut */
+
+/* Si vous avez une "jumbotron" ou une section d'introduction spécifique sur votre page d'accueil */
+.jumbotron, .hero-section, .welcome-banner {
+    background-color: var(--secondary-bg-color); /* Utilise la couleur de fond secondaire du thème */
+    color: var(--text-color); /* Utilise la couleur du texte du thème */
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border-radius: 0.3rem;
+    border: 1px solid var(--border-color);
+}
+
+/* Pour le pied de page (footer) si ce n'est pas déjà géré par .bg-dark qui est écrasé par les variables navbar */
+footer {
+    background-color: var(--navbar-bg) !important; /* Utilise la couleur de fond de la navbar pour le footer */
+    color: var(--navbar-text) !important; /* Utilise la couleur de texte de la navbar pour le footer */
+}
+
+/* Assurez-vous que les lignes horizontales (hr) s'adaptent */
+hr {
+    border-color: var(--border-color);
+}
+
+/* Styles pour distinguer les utilisateurs Administrateurs */
+.admin-username {
+    color: var(--admin-text-color); /* Couleur spécifique pour le nom d'utilisateur de l'admin */
+    font-weight: bold;
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Style pour l'icône admin */
+.admin-icon {
+    margin-left: 5px;
+    color: var(--admin-icon-color); /* Une couleur d'accent pour l'icône */
+    font-size: 0.9em;
+}
+
+/* Style pour le conteneur complet d'un commentaire d'admin */
+.admin-comment {
+    border-left: 5px solid var(--admin-border-color);
+    background-color: var(--admin-comment-bg-color);
+    padding-left: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease-in-out;
+}
+
+.admin-comment:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* profoot/static/profoot/style.css */
+
+/* ... (votre code CSS existant) ... */
+
+/* --- Styles spécifiques aux commentaires --- */
+.comments-section {
+    max-width: 800px; /* Définir une largeur maximale pour le bloc de commentaires */
+    margin-left: auto; /* Centrer le bloc sur la page */
+    margin-right: auto; /* Centrer le bloc sur la page */
+    padding: 0 15px; /* Ajouter un peu de padding sur les côtés pour les petits écrans */
+}
+
+/* Vous pouvez aussi ajuster la largeur des cartes individuelles de commentaires si nécessaire,
+   mais normalement elles devraient s'adapter à la largeur de .comments-section */
+.comments-section .card,
+.comments-section .list-group-item {
+    /* Ces éléments devraient déjà s'adapter à leur parent, mais si vous voulez une largeur spécifique */
+    /* max-width: 760px; */ /* Un peu moins que la section pour la consistance */
+    /* margin-left: auto; */
+    /* margin-right: auto; */
+}
+
+/* Ajustement pour le formulaire de commentaire si vous voulez qu'il soit plus étroit que la section */
+.comments-section form {
+    max-width: 700px; /* Rendre le formulaire légèrement plus étroit que le conteneur principal des commentaires */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ... (le reste de votre style.css) ... */

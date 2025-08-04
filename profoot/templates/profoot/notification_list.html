@@ -1,0 +1,75 @@
+{# profoot/templates/profoot/notification_list.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes Notifications{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1 class="mb-4 text-center">
+            <i class="fas fa-bell"></i> Mes Notifications
+        </h1>
+
+        {% if not user.is_authenticated %}
+            <div class="alert alert-warning text-center" role="alert">
+                Veuillez vous <a href="{% url 'login' %}">connecter</a> pour voir vos notifications.
+            </div>
+        {% elif not page_obj %}
+            <div class="alert alert-info text-center" role="alert">
+                Vous n'avez aucune notification pour le moment.
+            </div>
+        {% else %}
+            <div class="list-group">
+                {% for notification in page_obj %}
+                    <a href="{% if notification.notification_type == 'NEW_PRONOSTIC' and notification.related_object %}{% url 'detail_pronostic' pk=notification.related_object.pk %}{% elif notification.notification_type == 'FOLLOW' and notification.related_object %}{% url 'public_profile' username=notification.related_object.username %}{% else %}#{% endif %}"
+                       class="list-group-item list-group-item-action {% if not notification.is_read %}list-group-item-light{% endif %}"
+                       aria-current="true">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">
+                                {% if notification.notification_type == 'FOLLOW' %}
+                                    <i class="fas fa-user-plus text-primary"></i> Nouveau Suivi
+                                {% elif notification.notification_type == 'NEW_PRONOSTIC' %}
+                                    <i class="fas fa-futbol text-success"></i> Nouveau Pronostic
+                                {% else %}
+                                    <i class="fas fa-info-circle text-info"></i> Information
+                                {% endif %}
+                            </h5>
+                            <small class="text-muted">{{ notification.created_at|timesince }} ago</small>
+                        </div>
+                        <p class="mb-1">{{ notification.message }}</p>
+                        <small class="text-muted">
+                            {% if notification.is_read %}Lu{% else %}Non lu{% endif %}
+                        </small>
+                    </a>
+                {% endfor %}
+            </div>
+
+            {# Pagination #}
+            {% if page_obj.has_other_pages %}
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a></li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">Précédent</span></li>
+                        {% endif %}
+
+                        {% for i in page_obj.paginator.page_range %}
+                            {% if page_obj.number == i %}
+                                <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                            {% else %}
+                                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a></li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">Suivant</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        {% endif %}
+    </div>
+{% endblock %}

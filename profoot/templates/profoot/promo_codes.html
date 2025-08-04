@@ -1,0 +1,64 @@
+{# profoot/templates/profoot/promo_codes.html #}
+{% extends 'base.html' %}
+{% load static %} {# Ceci est important pour que les logos s'affichent si vous en utilisez #}
+
+{% block title %}Codes Promo & Offres Paris Sportifs - ProFoot Pronos{% endblock %}
+
+{% block content %}
+    <div class="container my-5">
+        <h1 class="text-center mb-5">MEILLEURS SITES DE PARIS SPORTIFS SUR PROFOOT PRONOS</h1>
+
+        <div class="card p-4 shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover table-borderless align-middle">
+                    <thead>
+                        <tr class="text-muted">
+                            <th scope="col">Bookmakers</th>
+                            <th scope="col">Bonus d'inscription</th>
+                            <th scope="col">Codes promo</th>
+                            <th scope="col">Parier</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for offer in offers %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <span class="me-3 fs-5 text-muted">{{ forloop.counter }}.</span> {# Numéro d'ordre #}
+                                    {% if offer.logo %}
+                                        <img src="{{ offer.logo.url }}" alt="{{ offer.name }} logo" class="img-fluid me-2" style="max-height: 30px; max-width: 60px;">
+                                    {% endif %}
+                                    <strong class="h5 mb-0">{{ offer.name }}</strong>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-success py-2 px-3">{{ offer.bonus_description }}</span>
+                            </td>
+                            <td>
+                                {% if offer.promo_code %}
+                                    <span class="badge bg-info text-dark py-2 px-3">{{ offer.promo_code }}</span>
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ offer.registration_link }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">Ouvrir un compte</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">Aucune offre de bookmaker disponible pour le moment.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {# Vous pouvez ajouter du texte explicatif ou un disclaimer ici #}
+        <div class="mt-5 text-center text-muted small">
+            <p>Ces offres sont soumises aux conditions générales des bookmakers. Veuillez parier de manière responsable.</p>
+        </div>
+
+    </div>
+{% endblock %}
