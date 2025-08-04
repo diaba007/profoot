@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+*.env
+.env
+
+# Django
+*.log
+*.sqlite3
+media/ # Si vous ne voulez pas versionner les fichiers uploadés
+static_root/
+myproject/settings/local.py # Si vous avez des settings locaux
+.DS_Store # macOS files
+
+# IDEs
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+.localized
+Thumbs.db
