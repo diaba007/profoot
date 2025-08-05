@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-g^v^*%9-4a)3oh9*r!d_ic$u8^2b)=r30)_lv_h7jcl2pyxg($
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['profoot.onrender.com', '.onrender.com']
+ALLOWED_HOSTS=['profoot.onrender.com', '.onrender.com', 'christiandiabagate.pythonanywhere.com']
 
 
 # Application definition
@@ -123,6 +123,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
