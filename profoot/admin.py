@@ -1,43 +1,21 @@
 # profoot/admin.py
 
 from django.contrib import admin
-from .models import Pronostic, Comment, BookmakerOffer, Follow, Notification, UserProfile, Match # Assurez-vous d'importer Match
-from .forms import PronosticAdminForm # Importez votre formulaire personnalisé
+# Assurez-vous que tous vos modèles utilisés sont importés ici
+from .models import Pronostic, Comment, BookmakerOffer, Follow, Notification, UserProfile
 
 # Enregistrement des modèles existants avec la syntaxe @admin.register
+# Remplacez votre "admin.site.register(Pronostic)" par ce bloc pour Pronostic
 @admin.register(Pronostic)
 class PronosticAdmin(admin.ModelAdmin):
-    form = PronosticAdminForm # Utilise le formulaire personnalisé
+    list_display = ('equipe_domicile', 'equipe_exterieur', 'date_match', 'discipline', 'resultat', 'utilisateur')
+    list_filter = ('discipline', 'resultat', 'date_match')
+    search_fields = ('equipe_domicile', 'equipe_exterieur', 'prediction_details')
+    date_hierarchy = 'date_match'
 
-    list_display = ('match', 'discipline', 'type_pari', 'resultat', 'utilisateur')
-    list_filter = ('discipline', 'resultat', 'match__date_match')
-    search_fields = ('match__equipe_domicile', 'match__equipe_exterieur', 'prediction_details')
-    date_hierarchy = 'match__date_match'
-
-    fieldsets = (
-        ('Match', {
-            'fields': ('match',)
-        }),
-        ('Création de Match Manuel', {
-            'fields': ('equipe_domicile_manuelle', 'equipe_exterieur_manuelle', 'date_match_manuelle', 'ligue_manuelle'),
-            'description': 'Utilisez cette section si le match n\'est pas dans la liste ci-dessus. Laissez vide si vous sélectionnez un match existant.'
-        }),
-        ('Détails du Pronostic', {
-            'fields': ('discipline', 'type_pari', 'prediction_details', 'cote', 'mise', 'bookmaker_recommande', 'lien_pari')
-        }),
-        ('Résultat', {
-            'fields': ('resultat',)
-        }),
-    )
-
-@admin.register(Match)
-class MatchAdmin(admin.ModelAdmin):
-    list_display = ('equipe_domicile', 'equipe_exterieur', 'date_match', 'ligue', 'api_event_id')
-    search_fields = ('equipe_domicile', 'equipe_exterieur', 'ligue')
-    list_filter = ('ligue', 'discipline')
-    # Vous pouvez également rendre 'api_event_id' en lecture seule pour les matchs non-API
-    # readonly_fields = ('api_event_id',) 
-
+# Si vous avez d'autres modèles comme Comment, Follow, Notification, UserProfile
+# assurez-vous qu'ils sont enregistrés de manière similaire ou selon votre configuration existante.
+# Exemple pour Comment :
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     list_display = ('pronostic', 'author', 'created_at', 'content')
@@ -45,7 +23,11 @@ class CommentAdmin(admin.ModelAdmin):
     search_fields = ('content',)
     raw_id_fields = ('pronostic', 'author')
 
-# Ajoutez les autres @admin.register si vous les aviez
+# Ajoutez les autres @admin.register pour Follow, Notification, UserProfile si vous les aviez
+# et que vous voulez qu'ils aient des options d'affichage spécifiques dans l'admin.
+# Sinon, un simple admin.site.register(MyModel) fonctionnerait aussi pour eux.
+
+# ENREGISTREMENT DU NOUVEAU MODÈLE BOOKMAKEROFFER
 @admin.register(BookmakerOffer)
 class BookmakerOfferAdmin(admin.ModelAdmin):
     list_display = ('name', 'bonus_description', 'promo_code', 'registration_link', 'order', 'is_active', 'created_at')
