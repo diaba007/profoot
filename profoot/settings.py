@@ -24,12 +24,28 @@ load_dotenv()
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-g^v^*%9-4a)3oh9*r!d_ic$u8^2b)=r30)_lv_h7jcl2pyxg($'
+# En production (Vercel), la clé vient de la variable d'environnement SECRET_KEY.
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-only-change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG est désactivé par défaut ; mettre DJANGO_DEBUG=1 pour le développement local.
+DEBUG = os.environ.get('DJANGO_DEBUG', '0') == '1'
 
-ALLOWED_HOSTS=['profoot.onrender.com', '.onrender.com', 'christiandiabagate.pythonanywhere.com']
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '.vercel.app',
+    'profoot.onrender.com',
+    '.onrender.com',
+    'christiandiabagate.pythonanywhere.com',
+]
+# Domaine personnalisé éventuel : DJANGO_ALLOWED_HOSTS="monsite.com,www.monsite.com"
+ALLOWED_HOSTS += [h.strip() for h in os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',') if h.strip()]
+CSRF_TRUSTED_ORIGINS = ['https://*.vercel.app']
+CSRF_TRUSTED_ORIGINS += [
+    'https://' + h.strip().lstrip('.')
+    for h in os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',') if h.strip()
+]
 
 
 # Application definition
@@ -48,6 +64,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # sert les fichiers statiques sur Vercel
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -80,12 +97,27 @@ WSGI_APPLICATION = 'profoot.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Avec DATABASE_URL (PostgreSQL, ex. Supabase) la base est persistante.
+# Sans DATABASE_URL, on utilise SQLite : en local dans db.sqlite3, sur Vercel dans /tmp
+# (mode démo : le disque de Vercel est éphémère, les données ne sont pas conservées).
+if os.environ.get('DATABASE_URL'):
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(
+            env='DATABASE_URL',
+            conn_max_age=0,        # compatible avec le pooler de connexions
+            conn_health_checks=True,
+            ssl_require=True,
+        )
     }
-}
+else:
+    _sqlite_path = '/tmp/db.sqlite3' if os.environ.get('VERCEL') else BASE_DIR / 'db.sqlite3'
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': _sqlite_path,
+        }
+    }
 
 
 # Password validation
@@ -123,7 +155,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# WhiteNoise sert directement les fichiers statiques des applications (dont l'admin Django),
+# sans étape collectstatic préalable.
+WHITENOISE_USE_FINDERS = True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
